@@ -37,6 +37,11 @@ make **gggenes** suitable format from prokka output
   sed 's/.fasta_prokka_out\/genome.*_1//g' \|
   sed -i 's/ + / 1 /g' \|
   sed -i 's/ - / -1 /g' >coordinates_files.gff
+
+EDIT1: grep "" *.gff | fgrep 'CDS' | sed 's/;product/  product/' | sed 's/ /_/g' | awk '{print $1,$4,$5,$3,$7,$NF}' | fgrep -v 'hypothetical_protein' | sed 's/.*.gff://g' | sed 's/ + / 1 /g' | sed 's/ - / -1 /g' >coordinates_files.gff
+
+
+
 ```
 Lets jump into **R** from here
 
