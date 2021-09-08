@@ -37,7 +37,7 @@ If you have multiple genomes, you can loop prokka:
 I actually wanted to annotate the plasmids using prokka. But sometime specific gene plasmids are not readily avaible in prokka database. So, we need to turn on
 the --proteins switch and provide the gbk file of the proteins we are interested to annotate in our plasmids.
 
-Specifically, in my case, I want to annotate the betalactam resistant genes. For this, I use the betalactam from resfinder database available here[here](https://bitbucket.org/genomicepidemiology/resfinder_db/src/master/beta-lactam.fsa).
+Specifically, in my case, I want to annotate the betalactam resistant genes. For this, I use the betalactam from resfinder database available [here](https://bitbucket.org/genomicepidemiology/resfinder_db/src/master/beta-lactam.fsa).
 
 After this, I extract all the NCBI accessions from the fasta file and download the gbk files for each of the betalactam gene like this:
 
@@ -61,6 +61,22 @@ do
   echo $d; 
   prokka "$d" --outdir "$d"_ClosePlasmid_ResGenes_prokka_out --prefix "$d" --centre X --compliant --proteins Closest_Plasmid_AND_Carbapenem_ResGenes.gbk; 
 done
+
+```
+We can now clearly see the difference between the prokka annotation using default setting and prokka annotation using additional gbk files provided;
+
+```
+# Default settings without additional GBK files 
+
+$ grep 'OXA' C1142_4_len_67445_circ_plasmid.fa_prokka_out/C1142_4_len_67445_circ_plasmid.fa.gff
+gnl|X|JBPEFOOM_1	Prodigal:2.6	CDS	10356	11231	.	+	0	ID=JBPEFOOM_00011;Parent=JBPEFOOM_00011_gene;eC_number=3.5.2.6;Name=bla_1;gene=bla_1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P13661;locus_tag=JBPEFOOM_00011;product=**Beta-lactamase OXA-1**;protein_id=gnl|X|JBPEFOOM_00011
+gnl|X|JBPEFOOM_1	Prodigal:2.6	CDS	15650	16447	.	-	0	ID=JBPEFOOM_00017;Parent=JBPEFOOM_00017_gene;eC_number=3.5.2.6;Name=bla_2;gene=bla_2;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P14489;locus_tag=JBPEFOOM_00017;product=**Beta-lactamase OXA-10**;protein_id=gnl|X|JBPEFOOM_00017
+
+# Default settings with additional GBK files 
+
+$ grep 'OXA' C1142_4_len_67445_circ_plasmid.fa_ClosePlasmid_ResGenes_prokka_out/C1142_4_len_67445_circ_plasmid.fa.gff
+gnl|X|JBPEFOOM_1	Prodigal:2.6	CDS	10356	11231	.	+	0	ID=JBPEFOOM_00011;Parent=JBPEFOOM_00011_gene;inference=ab initio prediction:Prodigal:2.6;locus_tag=JBPEFOOM_00011;note=**OXA-48**;product=hypothetical protein;protein_id=gnl|X|JBPEFOOM_00011
+gnl|X|JBPEFOOM_1	Prodigal:2.6	CDS	15650	16447	.	-	0	ID=JBPEFOOM_00017;Parent=JBPEFOOM_00017_gene;inference=ab initio prediction:Prodigal:2.6;locus_tag=JBPEFOOM_00017;note=**OXA-48**;product=hypothetical protein;protein_id=gnl|X|JBPEFOOM_00017
 
 ```
 
