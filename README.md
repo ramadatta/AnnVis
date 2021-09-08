@@ -29,7 +29,46 @@ If you have multiple genomes, you can loop prokka:
   done
 
 ```
+
+####################----Updating this section on September 8th,2021:START----####################
+
+#### Working with plasmids
+
+I actually wanted to annotate the plasmids using prokka. But sometime specific gene plasmids are not readily avaible in prokka database. So, we need to turn on
+the --proteins switch and provide the gbk file of the proteins we are interested to annotate in our plasmids.
+
+Specifically, in my case, I want to annotate the betalactam resistant genes. For this, I use the betalactam from resfinder database available here[here](https://bitbucket.org/genomicepidemiology/resfinder_db/src/master/beta-lactam.fsa).
+
+After this, I extract all the NCBI accessions from the fasta file and download the gbk files for each of the betalactam gene like this:
+
+```
+grep '>' beta-lactam.fsa | grep -Po "_[A-Z].*" | sed 's/^_//g' >beta-lactam_accessions.list
+
+time for i in $(cat beta-lactam_accessions.list | sed 's/:.*//g'); # it can be "time for i in CM004561 AY236073 AY034847;" if you know which genes you are dealing with
+do 
+  echo $i; 
+  time curl -s  "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nucleotide&id=${i}&rettype=gb&retmode=txt" >$i.gbk ; 
+done
+```
+
+Previously we chose the closest plasmid. So, we combine all the gbk into one file to pass to prokka
+
+```
+cat CP068017.gbk *.gbk >Closest_Plasmid_AND_Carbapenem_ResGenes.gbk
+
+time for d in $(ls *.fa); 
+do 
+  echo $d; 
+  prokka "$d" --outdir "$d"_ClosePlasmid_ResGenes_prokka_out --prefix "$d" --centre X --compliant --proteins Closest_Plasmid_AND_Carbapenem_ResGenes.gbk; 
+done
+
+```
+
+####################----Updating this section on September 8th,2021:END----####################
+
+
 make **gggenes** suitable format from prokka output
+
 ```
 % grep "" */*.gff | fgrep 'CDS' \|
   awk '{print $1,$4,$5,$3,$7,$NF}' \|
