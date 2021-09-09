@@ -80,6 +80,41 @@ gnl|X|JBPEFOOM_1	Prodigal:2.6	CDS	15650	16447	.	-	0	ID=JBPEFOOM_00017;Parent=JBP
 
 ```
 
+Now let's make a coordinate file suitable to draw using `gggenes package`
+
+```
+grep "" *_prokka_out/*.gff | 
+fgrep 'CDS' |  
+sed -r 's/(note=.*);product=hypothetical protein/\1/g' | 
+sed 's/note=/product=/g' | sed 's/;product/	product/' | 
+sed 's/ /_/g' | awk '{print $1,$4,$5,$3,$7,$NF}' | 
+fgrep -v 'hypothetical_protein' | 
+sed  -e 's/.*_prokka_out\///g' | 
+sed 's/:/	/g' | 
+sed 's/	+	/	1	/g' | # tabs
+sed 's/	-	/	-1	/g' | # tabs
+sed -e 's/product=//g' -e 's/;protein_id=.*$//g' | 
+awk '{$2="";print}' | 
+cat -n | 
+sed 's/.gff//g' | 
+sed -e 's/ \+/ /g' -e 's/^ //g' -e 's/\t/ /g' | 
+sed 's/ /,/g' | awk -F ',' '$6 ~ /+/ {print $0",forward"} $6 ~ /-/ {print $0",reverse"}' | 
+sed 's/,CDS//g' >coordinates_files.gff
+
+ (echo "No","molecule","start","end","direction","gene","strand" && cat coordinates_files.gff) > filename1 && mv filename1 coordinates_files.gff
+
+grep -A 3 -B 3 'OXA-48,reverse' coordinates_files.gff | sed 's/--//g' | sed '/^$/d' >OXA-48_reverse.gff
+
+$ grep -A 3 -B 3 'OXA-48,reverse' coordinates_files.gff | sed 's/--//g' | sed '/^$/d' >OXA-48_reverse.gff
+$ grep -A 3 -B 3 'OXA-48,forward' coordinates_files.gff | sed 's/--//g' | sed '/^$/d' >OXA-48_forward.gff
+
+$  (echo "No","molecule","start","end","direction","gene","strand" && cat OXA-48_forward.gff) > filename1 && mv filename1 OXA-48_forward.gff
+$  (echo "No","molecule","start","end","direction","gene","strand" && cat OXA-48_reverse.gff) > filename1 && mv filename1 OXA-48_reverse.gff
+
+```
+
+
+
 ####################----Updating this section on September 8th,2021:END----####################
 
 
